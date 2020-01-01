@@ -128,7 +128,7 @@ namespace ssr {
 
 	public:
 		double getResolution() const { return m_Resolution; }
-		uint32_t getWidth() const { return m_XMax-m_XMin; }
+		uint32_t getWidth() const { return m_XMax - m_XMin; }
 		uint32_t getHeight() const { return m_YMax - m_YMin; }
 		int32_t getOriginX() const { return getWidth() - m_XMax; }
 		int32_t getOriginY() const { return getHeight() - m_YMax; }
@@ -142,7 +142,7 @@ namespace ssr {
 
 		void setResolution(const double resolution) {m_Resolution = resolution;}
 
-		void setSize(const uint32_t w, const uint32_t h, const uint32_t origin_x, const uint32_t origin_y) { 
+		void setSize(const uint32_t w, const uint32_t h, const int32_t origin_x, const int32_t origin_y) { 
 			if (getWidth() != w || getHeight() != h) {
 				delete m_pGrid;
 				m_pGrid = new uint8_t[w*h];

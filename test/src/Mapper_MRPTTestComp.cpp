@@ -1,6 +1,6 @@
 ﻿// -*- C++ -*-
 /*!
- * @file Mapper_MRPTComp.cpp
+ * @file Mapper_MRPTTestComp.cpp
  * @brief Standalone component
  * @date $Date$
  *
@@ -13,16 +13,16 @@
 #include <iostream>
 #include <string>
 #include <stdlib.h>
-#include "Mapper_MRPT.h"
+#include "Mapper_MRPTTest.h"
 
 
 void MyModuleInit(RTC::Manager* manager)
 {
-  Mapper_MRPTInit(manager);
+  Mapper_MRPTTestInit(manager);
   RTC::RtcBase* comp;
 
   // Create a component
-  comp = manager->createComponent("Mapper_MRPT");
+  comp = manager->createComponent("Mapper_MRPTTest");
 
   if (comp==NULL)
   {
@@ -77,6 +77,9 @@ int main (int argc, char** argv)
 {
   RTC::Manager* manager;
   manager = RTC::Manager::init(argc, argv);
+
+  // Initialize manager
+  manager->init(argc, argv);
 
   // Set module initialization proceduer
   // This procedure will be invoked in activateManager() function.

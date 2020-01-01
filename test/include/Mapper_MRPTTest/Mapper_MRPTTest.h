@@ -1,6 +1,6 @@
 ﻿// -*- C++ -*-
 /*!
- * @file  Mapper_MRPT.h
+ * @file  Mapper_MRPTTest.h
  * @brief Mapper RTC using MRPT (Mobile Robot Programming Toolkit)
  * @date  $Date$
  *
@@ -9,8 +9,8 @@
  * $Id$
  */
 
-#ifndef MAPPER_MRPT_H
-#define MAPPER_MRPT_H
+#ifndef MAPPER_MRPT_TEST__H
+#define MAPPER_MRPT_TEST_H
 
 #include <rtm/idl/BasicDataTypeSkel.h>
 #include <rtm/idl/ExtendedDataTypesSkel.h>
@@ -18,15 +18,19 @@
 
 // Service implementation headers
 // <rtc-template block="service_impl_h">
-#include "MobileRobotSVC_impl.h"
+#include "InterfaceDataTypesSVC_impl.h"
+#include "ExtendedDataTypesSVC_impl.h"
 
 // </rtc-template>
 
 // Service Consumer stub headers
 // <rtc-template block="consumer_stub_h">
-#include "InterfaceDataTypesStub.h"
-#include "ExtendedDataTypesStub.h"
+#include "MobileRobotStub.h"
 
+// </rtc-template>
+
+// Service Consumer stub headers
+// <rtc-template block="port_stub_h">
 // </rtc-template>
 
 #include <rtm/Manager.h>
@@ -35,9 +39,8 @@
 #include <rtm/DataInPort.h>
 #include <rtm/DataOutPort.h>
 
-#include "MapBuilder.h"
 /*!
- * @class Mapper_MRPT
+ * @class Mapper_MRPTTest
  * @brief Mapper RTC using MRPT (Mobile Robot Programming Toolkit)
  *
  * RT-component for SLAM (Simaltaneously Localization and
@@ -51,7 +54,7 @@
  * Please see official website of mrpt.
  *
  */
-class Mapper_MRPT
+class Mapper_MRPTTest
   : public RTC::DataFlowComponentBase
 {
  public:
@@ -59,12 +62,12 @@ class Mapper_MRPT
    * @brief constructor
    * @param manager Maneger Object
    */
-  Mapper_MRPT(RTC::Manager* manager);
+  Mapper_MRPTTest(RTC::Manager* manager);
 
   /*!
    * @brief destructor
    */
-  ~Mapper_MRPT();
+  ~Mapper_MRPTTest();
 
   // <rtc-template block="public_attribute">
   
@@ -77,6 +80,7 @@ class Mapper_MRPT
   /***
    *
    * The initialize action (on CREATED->ALIVE transition)
+   * formaer rtc_init_entry() 
    *
    * @return RTC::ReturnCode_t
    * 
@@ -87,6 +91,7 @@ class Mapper_MRPT
   /***
    *
    * The finalize action (on ALIVE->END transition)
+   * formaer rtc_exiting_entry()
    *
    * @return RTC::ReturnCode_t
    * 
@@ -97,6 +102,7 @@ class Mapper_MRPT
   /***
    *
    * The startup action when ExecutionContext startup
+   * former rtc_starting_entry()
    *
    * @param ec_id target ExecutionContext Id
    *
@@ -109,6 +115,7 @@ class Mapper_MRPT
   /***
    *
    * The shutdown action when ExecutionContext stop
+   * former rtc_stopping_entry()
    *
    * @param ec_id target ExecutionContext Id
    *
@@ -121,6 +128,7 @@ class Mapper_MRPT
   /***
    *
    * The activated action (Active state entry action)
+   * former rtc_active_entry()
    *
    * @param ec_id target ExecutionContext Id
    *
@@ -133,6 +141,7 @@ class Mapper_MRPT
   /***
    *
    * The deactivated action (Active state exit action)
+   * former rtc_active_exit()
    *
    * @param ec_id target ExecutionContext Id
    *
@@ -145,6 +154,7 @@ class Mapper_MRPT
   /***
    *
    * The execution action that is invoked periodically
+   * former rtc_active_do()
    *
    * @param ec_id target ExecutionContext Id
    *
@@ -157,6 +167,7 @@ class Mapper_MRPT
   /***
    *
    * The aborting action when main logic error occurred.
+   * former rtc_aborting_entry()
    *
    * @param ec_id target ExecutionContext Id
    *
@@ -169,6 +180,7 @@ class Mapper_MRPT
   /***
    *
    * The error action in ERROR state
+   * former rtc_error_do()
    *
    * @param ec_id target ExecutionContext Id
    *
@@ -181,6 +193,7 @@ class Mapper_MRPT
   /***
    *
    * The reset action that is invoked resetting
+   * This is same but different the former rtc_init_entry()
    *
    * @param ec_id target ExecutionContext Id
    *
@@ -193,6 +206,7 @@ class Mapper_MRPT
   /***
    *
    * The state update action that is invoked after onExecute() action
+   * no corresponding operation exists in OpenRTm-aist-0.2.0
    *
    * @param ec_id target ExecutionContext Id
    *
@@ -205,6 +219,7 @@ class Mapper_MRPT
   /***
    *
    * The action that is invoked when execution context's rate is changed
+   * no corresponding operation exists in OpenRTm-aist-0.2.0
    *
    * @param ec_id target ExecutionContext Id
    *
@@ -619,30 +634,30 @@ class Mapper_MRPT
 
   // DataInPort declaration
   // <rtc-template block="inport_declare">
-  RTC::RangeData m_range;
+  RTC::TimedPose2D m_estimatedPose;
   /*!
-   * Input for Ranger Data (LiDAR sensors.)
+   * Estimated pose of robot with SLAM algorithm (ICP)
    * - Unit: meter, rad
    */
-  RTC::InPort<RTC::RangeData> m_rangeIn;
-  RTC::TimedPose2D m_odometry;
-  /*!
-   * Input for odometry of mobile robot.
-   * - Unit: meter, rad
-   */
-  RTC::InPort<RTC::TimedPose2D> m_odometryIn;
+  RTC::InPort<RTC::TimedPose2D> m_estimatedPoseIn;
   
   // </rtc-template>
 
 
   // DataOutPort declaration
   // <rtc-template block="outport_declare">
-  RTC::TimedPose2D m_estimatedPose;
+  RTC::RangeData m_range;
   /*!
-   * Estimated pose of robot with SLAM algorithm (ICP)
+   * Input for Ranger Data (LiDAR sensors.)
    * - Unit: meter, rad
    */
-  RTC::OutPort<RTC::TimedPose2D> m_estimatedPoseOut;
+  RTC::OutPort<RTC::RangeData> m_rangeOut;
+  RTC::TimedPose2D m_odometry;
+  /*!
+   * Input for odometry of mobile robot.
+   * - Unit: meter, rad
+   */
+  RTC::OutPort<RTC::TimedPose2D> m_odometryOut;
   
   // </rtc-template>
 
@@ -662,17 +677,17 @@ class Mapper_MRPT
 
   // Service declaration
   // <rtc-template block="service_declare">
-  /*!
-   * This port provides the services for Mapper. Please see
-   * MobileRobot.idl to know more about the interface. Ths port
-   * provides OGMapper service.
-   */
-  RTC_OGMapperSVC_impl m_mapper;
   
   // </rtc-template>
 
   // Consumer declaration
   // <rtc-template block="consumer_declare">
+  /*!
+   * This port provides the services for Mapper. Please see
+   * MobileRobot.idl to know more about the interface. Ths port
+   * provides OGMapper service.
+   */
+  RTC::CorbaConsumer<RTC::OGMapper> m_mapper;
   
   // </rtc-template>
 
@@ -684,26 +699,13 @@ class Mapper_MRPT
   // <rtc-template block="private_operation">
   
   // </rtc-template>
-  ssr::MapBuilder* m_pMapBuilder;
-  bool m_odomUpdated;
-  bool m_rangeUpdated;
-  ssr::Pose2D m_OldPose;
-  ssr::Map m_Map;
 
-  public:
-
-	void getCurrentMap(RTC::OGMap_out map);
-	int32_t startMapping();
-	int32_t stopMapping();
-
-  RTC::MAPPER_STATE getState();
-  coil::Mutex m_mapperMutex;
 };
 
 
 extern "C"
 {
-  DLL_EXPORT void Mapper_MRPTInit(RTC::Manager* manager);
+  DLL_EXPORT void Mapper_MRPTTestInit(RTC::Manager* manager);
 };
 
-#endif // MAPPER_MRPT_H
+#endif // MAPPER_MRPT_TEST_H

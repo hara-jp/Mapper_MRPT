@@ -17,6 +17,8 @@
 #include <mrpt/gui.h>
 #include <mrpt/utils.h>
 */
+#include <mrpt/slam/CICP.h>
+#include <mrpt/utils.h>
 
 using namespace mrpt::utils;
 using namespace mrpt::poses;
@@ -188,7 +190,11 @@ bool MapBuilder_MRPT::initialize(MapBuilderParam& param_)
 		m_MapBuilder.ICP_params.ICP_algorithm = icpLevenbergMarquardt;
 	}
 	else if (param.ICP_algorithm == "icpIKF") {
+#if 0 // for mrpt < 1.5
 		m_MapBuilder.ICP_params.ICP_algorithm = icpIKF;
+#else
+		std::cerr << "ERRPR:MRPT 1.5 does net support ipcIKF..." << std::endl;
+#endif
 	}
 
 	m_MapBuilder.ICP_params.onlyClosestCorrespondences = param.ICP_onlyClosestCorrespondences;
@@ -329,17 +335,26 @@ bool MapBuilder_MRPT::addRange(const ssr::Range& range)
 {
 	mrpt::obs::CObservation2DRangeScanPtr observation = mrpt::obs::CObservation2DRangeScan::Create();
 	observation->rightToLeft = true;
+#if 0 // MRPT verson < 1.5
 	observation->validRange.resize(range.size);
 	observation->scan.resize(range.size);
+#else
+	observation->resizeScan(range.size);
+#endif
 	observation->aperture = range.aperture;
 	observation->timestamp = mrpt::system::getCurrentTime();
 	for(int i = 0;i < range.size; i++) {
+#if 0 // MRPT < 1.5
 		observation->scan[i] = range.range[i];
 		//if(observation->scan[i] > m_range_min && observation->scan[i] < m_range_max) {
 			observation->validRange[i] = 1;
 		//} else {
 		//	observation->validRange[i] = 0;
 		//}
+#else
+		observation->setScanRange(i, range.range[i]);
+		observation->setScanRangeValidity(i, 1);
+#endif
 	}
 	m_RangeSensorPose.x(range.offset.x);
 	m_RangeSensorPose.y(range.offset.y);
@@ -373,7 +388,7 @@ Pose2D MapBuilder_MRPT::getEstimatedPose()
 
 void MapBuilder_MRPT::getCurrentMap(ssr::Map& map)
 {
-  mrpt::maps::CMultiMetricMap *pMap = m_MapBuilder.getCurrentlyBuiltMetricMap();
+  const mrpt::maps::CMultiMetricMap *pMap = m_MapBuilder.getCurrentlyBuiltMetricMap();
 	if (pMap->m_gridMaps.size() == 0) {
 		std::cerr << "[MRPT] No Grid Map Error" << std::endl;
 		return;
@@ -394,6 +409,7 @@ void MapBuilder_MRPT::getCurrentMap(ssr::Map& map)
 	//float xmax = pMap->m_gridMaps[0]->getYMax();
 	//float xmin = pMap->m_gridMaps[0]->getYMin();
 
+	std::cerr << ">>> " << width << ", " << height <<std::endl;
 	map.setSize(width, height, xmin/resolution, ymax/resolution);
 	map.setResolution(pMap->m_gridMaps[0]->getResolution());
 	for(int i = 0;i < height;i++) {
@@ -403,6 +419,7 @@ void MapBuilder_MRPT::getCurrentMap(ssr::Map& map)
 //			map.setCell(j, (height-1-i), static_cast<uint8_t>(255 * pMap->m_gridMaps[0]->getCell(i, j)));
 		}
 	}
+
 }
 
 int32_t MapBuilder_MRPT::startMapping()
